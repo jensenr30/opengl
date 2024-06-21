@@ -20,6 +20,9 @@ SDL_GLContext gl_context;
 GLuint vertex_array_object = 0; // VAO
 GLuint vertex_buffer_object = 0; // VBO
 
+GLuint vertex_array_object_color = 0; // VAO
+GLuint vertex_buffer_object_color = 0; // VBO
+
 // program object (for the shaders) - this is the shader program
 GLuint graphics_pipeline_shader_program = 0;
 
@@ -166,6 +169,12 @@ int VertexSpecification(void) {
          0.0f,  0.8f, 0.0f  // vertex 3
     };
 
+    const std::vector<GLfloat> vertexColors {
+        1.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 1.0f,
+    };
+
     // set up stuff on the GPU
     glGenVertexArrays(1, &vertex_array_object);
     glBindVertexArray(vertex_array_object);
@@ -174,12 +183,21 @@ int VertexSpecification(void) {
     glGenBuffers(1, &vertex_buffer_object);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object);
     glBufferData(GL_ARRAY_BUFFER, vertexPosition.size() * sizeof(GLfloat), vertexPosition.data(), GL_STATIC_DRAW);
+
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    // create an open gl buffer for the colors for each vertex
+    glGenBuffers(1, &vertex_buffer_object_color);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object_color);
+    glBufferData(GL_ARRAY_BUFFER, vertexColors.size() * sizeof(GLfloat), vertexColors.data(), GL_STATIC_DRAW);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, /* r g b */ GL_FLOAT, GL_FALSE, 0, (void *)0);
 
     // unbind
     glBindVertexArray(0);
     glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
 
     return 0;
 }
@@ -228,17 +246,11 @@ static int MainLoop(void) {
     if (quit) {
         return 1;
     }
-    static int counter = 0;
-    printf("MainLoop!\n");
     UserInput();
     PreDraw();
     Draw();
     SDL_GL_SwapWindow(window);
     SDL_Delay(16);
-    counter++;
-    if(counter >= 3) {
-        // quit = true;
-    }
     return 0;
 }
 
