@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <vector>
 #include <string>
+#include <fstream>
+
+using std::ifstream;
 
 #include <SDL2/SDL.h>
 #include <glad/glad.h>
@@ -20,22 +23,19 @@ GLuint vertex_buffer_object = 0; // VBO
 // program object (for the shaders) - this is the shader program
 GLuint graphics_pipeline_shader_program = 0;
 
- const std::string vertex_shader_source =
-    "#version 410 core\n"
-    "in vec4 position;\n"
-    "void main() {\n"
-    "    gl_Position = vec4(position.x, position.y, position.z, position.w);\n"
-    "}\n"
-;
+std::string load_shader_from_file(const std::string& filename) {
+    std::string shader_source = "";
+    std::string line = "";
+    std::ifstream file(filename.c_str());
 
- const std::string fragment_shader_source =
-    "#version 410 core\n"
-    "out vec4 color;\n"
-    "void main() {\n"
-    "    color = vec4(0.0f, 0.5f, 1.0f, 1.0f);\n"
-    "}\n"
-;
-
+    if (file.is_open()) {
+        while(std::getline(file, line)) {
+            shader_source += line + '\n';
+        }
+        file.close();
+    }
+    return shader_source;
+}
 
 GLuint compile_shader(GLuint type, const std::string& source) {
     GLuint shader_object;
@@ -97,6 +97,10 @@ GLuint create_shader_program(const std::string& vertex_shader_source,
 }
 
 int create_graphics_pipeline(void) {
+
+    std::string vertex_shader_source   = load_shader_from_file("vertex_shader.vert");
+    std::string fragment_shader_source = load_shader_from_file("fragment_shader.frag");
+
     graphics_pipeline_shader_program = create_shader_program(vertex_shader_source, fragment_shader_source);
     return 0;
 }
@@ -201,7 +205,7 @@ void PreDraw(void) {
     glDisable(GL_CULL_FACE);
 
     glViewport(0,0,screen.w, screen.h);
-    glClearColor(1.f, 0.f, 1.f, 1.f);
+    glClearColor(0.5f, 0.f, 0.3f, 1.f);
 
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
