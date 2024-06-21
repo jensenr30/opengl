@@ -20,9 +20,6 @@ SDL_GLContext gl_context;
 GLuint vertex_array_object = 0; // VAO
 GLuint vertex_buffer_object = 0; // VBO
 
-GLuint vertex_array_object_color = 0; // VAO
-GLuint vertex_buffer_object_color = 0; // VBO
-
 // program object (for the shaders) - this is the shader program
 GLuint graphics_pipeline_shader_program = 0;
 
@@ -162,17 +159,14 @@ static int InitializeProgram(void) {
 
 int VertexSpecification(void) {
     // lives on the CPU
-    const std::vector<GLfloat> vertexPosition {
+    const std::vector<GLfloat> vertexPositionAndColor {
         //  x      y     z
         -0.8f, -0.8f, 0.0f, // vertex 1
+        1.0f, 0.0f, 0.0f, // color 1
          0.8f, -0.8f, 0.0f, // vertex 2
-         0.0f,  0.8f, 0.0f  // vertex 3
-    };
-
-    const std::vector<GLfloat> vertexColors {
-        1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 1.0f,
+        0.0f, 1.0f, 0.0f, // color 2
+         0.0f,  0.8f, 0.0f,  // vertex 3
+        0.0f, 0.0f, 1.0f, // color 3
     };
 
     // set up stuff on the GPU
@@ -182,22 +176,20 @@ int VertexSpecification(void) {
     // start generating our VBO
     glGenBuffers(1, &vertex_buffer_object);
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object);
-    glBufferData(GL_ARRAY_BUFFER, vertexPosition.size() * sizeof(GLfloat), vertexPosition.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexPositionAndColor.size() * sizeof(GLfloat), vertexPositionAndColor.data(), GL_STATIC_DRAW);
 
+    // vertex data
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    const int stride = 6 * sizeof(GLfloat);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
 
-    // create an open gl buffer for the colors for each vertex
-    glGenBuffers(1, &vertex_buffer_object_color);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object_color);
-    glBufferData(GL_ARRAY_BUFFER, vertexColors.size() * sizeof(GLfloat), vertexColors.data(), GL_STATIC_DRAW);
+    // color data
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, /* r g b */ GL_FLOAT, GL_FALSE, 0, (void *)0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3*sizeof(GLfloat)));
 
     // unbind
     glBindVertexArray(0);
     glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
 
     return 0;
 }
