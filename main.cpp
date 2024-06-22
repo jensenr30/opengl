@@ -8,6 +8,11 @@ using std::ifstream;
 #include <SDL2/SDL.h>
 #include <glad/glad.h>
 
+#include <glm/glm.hpp>
+#include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "triangle.h"
 
 struct screen {
@@ -24,11 +29,11 @@ GLuint vertex_buffer_object = 0; // VBO
 // index buffer object - used to store the list of indicies that we want to draw as verticies
 GLuint gIndexBufferObject = 0;
 
-float offset_y = 0.0f;
-float offset_x = 0.0f;
-
 // program object (for the shaders) - this is the shader program
 GLuint graphics_pipeline_shader_program = 0;
+
+float offset_y = 0.0f;
+float offset_x = 0.0f;
 
 void gl_clear_errors(void) {
     while(glGetError() != GL_NO_ERROR) {
@@ -256,20 +261,20 @@ void UserInput(void) {
     }
     const Uint8 *state = SDL_GetKeyboardState(NULL);
     if (state[SDL_SCANCODE_UP]) {
-        offset_y += 0.01f;
-        printf("UP\n");
+        offset_y += 0.01;
+        // printf("UP\n");
     }
     if (state[SDL_SCANCODE_DOWN]) {
-        offset_y -= 0.01f;
-        printf("DOWN\n");
+        offset_y -= 0.01;
+        // printf("DOWN\n");
     }
     if (state[SDL_SCANCODE_LEFT]) {
-        offset_x -= 0.01f;
-        printf("LEFT\n");
+        offset_x -= 0.01;
+        // printf("LEFT\n");
     }
     if (state[SDL_SCANCODE_RIGHT]) {
-        offset_x += 0.01f;
-        printf("RIGHT\n");
+        offset_x += 0.01;
+        // printf("RIGHT\n");
     }
 }
 
@@ -284,21 +289,18 @@ void PreDraw(void) {
 
     glUseProgram(graphics_pipeline_shader_program);
 
-    GLint location = glGetUniformLocation(graphics_pipeline_shader_program, "offset_y");
-    if (location >= 0) {
-        printf("location of offset_y: %d\n", location);
+    glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(offset_x, offset_y, 0.0f));
+    // retrieve the location of our model matrix
+
+    GLint model_matrix_location
+        = glGetUniformLocation(graphics_pipeline_shader_program, "model_matrix");
+    if (model_matrix_location >= 0) {
+        glUniformMatrix4fv(model_matrix_location, 1, GL_FALSE, &translate[0][0]);
+        // printf("model_matrix_location: %d\n", model_matrix_location);
     } else {
         printf("ERROR getting location of uniform\n");
+        exit(-23);
     }
-    glUniform1f(location, offset_y);
-
-    GLint location_x = glGetUniformLocation(graphics_pipeline_shader_program, "offset_x");
-    if (location >= 0) {
-        printf("location of offset_x: %d\n", location_x);
-    } else {
-        printf("ERROR getting location of uniform offset_x\n");
-    }
-    glUniform1f(location_x, offset_x);
 }
 
 void Draw(void) {
@@ -309,7 +311,7 @@ void Draw(void) {
     // old way of drawing vertices
     // glDrawArrays(GL_TRIANGLES,0,6);
 
-    glcheck(glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_INT, 0););
+    glcheck(glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_INT, 0));
 
     // stop using the current graphics pipeline - this is probably necessary when using multiple
     // graphics pipelines
