@@ -161,12 +161,18 @@ int VertexSpecification(void) {
     // lives on the CPU
     const std::vector<GLfloat> vertexPositionAndColor {
         //  x      y     z
-        -0.8f, -0.8f, 0.0f, // vertex 1
-        1.0f, 0.0f, 0.0f, // color 1
-         0.8f, -0.8f, 0.0f, // vertex 2
-        0.0f, 1.0f, 0.0f, // color 2
-         0.0f,  0.8f, 0.0f,  // vertex 3
-        0.0f, 0.0f, 1.0f, // color 3
+        -.5f,-.5f,0.f, // vertex 1
+                                        1.0f, 0.0f, 0.0f, // color 1
+        0.5f,-.5f,0.f,  // vertex 2
+                                        0.0f, 1.0f, 0.0f, // color 2
+        -.5f,.5f,0.f, // vertex 3
+                                        0.0f, 0.0f, 1.0f, // color 3
+        .5f,.5f,0.f, // vertex 1
+                                        1.0f, 0.0f, 0.0f, // color 1
+        -0.5f,.5f,0.f,  // vertex 2
+                                        0.0f, 0.0f, 1.0f, // color 3
+        .5f,-.5f,0.f, // vertex 3
+                                        0.0f, 1.0f, 0.0f, // color 2
     };
 
     // set up stuff on the GPU
@@ -227,7 +233,7 @@ void Draw(void) {
     glBindVertexArray(vertex_array_object);
     // bind the actual data (buffer)
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object);
-    glDrawArrays(GL_TRIANGLES,0,3);
+    glDrawArrays(GL_TRIANGLES,0,6);
 
     // stop using the current graphics pipeline - this is probably necessary when using multiple
     // graphics pipelines
