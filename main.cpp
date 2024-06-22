@@ -27,6 +27,22 @@ GLuint gIndexBufferObject = 0;
 // program object (for the shaders) - this is the shader program
 GLuint graphics_pipeline_shader_program = 0;
 
+void gl_clear_errors(void) {
+    while(glGetError() != GL_NO_ERROR) {
+    }
+}
+
+bool gl_get_error(const char *file, int line) {
+    while(GLenum error = glGetError()) {
+        printf("%s:%d\n", file, line);
+        printf("OpenGL ERROR: %d\n", error);
+        return true;
+    }
+    return false;
+}
+
+#define glcheck(x) gl_clear_errors(); x; gl_get_error(__FILE__, __LINE__);
+
 std::string load_shader_from_file(const std::string& filename) {
     std::string shader_source = "";
     std::string line = "";
@@ -257,7 +273,7 @@ void Draw(void) {
     // old way of drawing vertices
     // glDrawArrays(GL_TRIANGLES,0,6);
 
-    glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_INT, 0);
+    glcheck(glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_INT, 0););
 
     // stop using the current graphics pipeline - this is probably necessary when using multiple
     // graphics pipelines
