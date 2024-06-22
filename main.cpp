@@ -32,8 +32,9 @@ GLuint gIndexBufferObject = 0;
 // program object (for the shaders) - this is the shader program
 GLuint graphics_pipeline_shader_program = 0;
 
-float offset_y = 0.0f;
 float offset_x = 0.0f;
+float offset_y = 0.0f;
+float offset_z = -0.5f;
 
 float angle_x = 0;
 float angle_y = 0;
@@ -159,8 +160,8 @@ static int InitializeProgram(void) {
         printf("SDL_Init ERROR");
         return -1;
     }
+    screen.w = 1920;
     screen.h = 1080;
-    screen.w = 1080;
     window = SDL_CreateWindow("OpenGL Window", 0,0, screen.w, screen.h, SDL_WINDOW_OPENGL);
     if (!window) {
         printf("Failed to make window\n");
@@ -186,6 +187,13 @@ static int InitializeProgram(void) {
     }
 
     print_open_gl_info();
+
+    int error = SDL_GL_SetSwapInterval(-1); // -1 = vsync
+    if (error) {
+        printf("error: %d\n", error);
+        const char *msg = SDL_GetError();
+        printf(msg);
+    }
 
     printf("InitializeProgram Success!\n");
     return 0;
@@ -282,6 +290,14 @@ void UserInput(void) {
         offset_x += 0.01;
         // printf("RIGHT\n");
     }
+    if (state[SDL_SCANCODE_PAGEDOWN]) {
+        offset_z += 0.01;
+        printf("offset_z: %f\n", offset_z);
+    }
+    if (state[SDL_SCANCODE_PAGEUP]) {
+        offset_z -= 0.01;
+        printf("offset_z: %f\n", offset_z);
+    }
     if (state[SDL_SCANCODE_W]) {
         angle_x += 2*pi / 100;
     }
@@ -319,7 +335,7 @@ void PreDraw(void) {
 
     glUseProgram(graphics_pipeline_shader_program);
 
-    glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(offset_x, offset_y, 0.0f));
+    glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(offset_x, offset_y, offset_z));
     // retrieve the location of our model matrix
 
     transform           = glm::rotate(transform, angle_x, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -335,6 +351,15 @@ void PreDraw(void) {
     } else {
         printf("ERROR getting location of uniform\n");
         exit(-23);
+    }
+
+    glm::mat4 perspective = glm::perspective((float)pi/4, (float)screen.w/(float)screen.h, 0.1f, 10.0f);
+    GLint perspective_location = glGetUniformLocation(graphics_pipeline_shader_program, "perspective");
+    if (perspective_location >= 0) {
+        glUniformMatrix4fv(perspective_location, 1, GL_FALSE, &perspective[0][0]);
+    } else {
+        printf("PERSPECTIVE LICATION FAIL OPEN GL FAILURE U U U URURURURU /s \n");
+        exit(-42);
     }
 }
 
@@ -354,6 +379,10 @@ void Draw(void) {
 }
 
 static int MainLoop(void) {
+    static uint32_t last_frame_print_ms = 0;
+    static uint32_t last_frame_count = 0;
+    static uint32_t frame_counter = 0;
+
     if (quit) {
         return 1;
     }
@@ -361,7 +390,13 @@ static int MainLoop(void) {
     PreDraw();
     Draw();
     SDL_GL_SwapWindow(window);
-    SDL_Delay(16);
+    frame_counter++;
+    uint32_t time_ms = SDL_GetTicks();
+    if (time_ms - last_frame_print_ms >= 1000) {
+        printf("FPS: %f\n", (frame_counter - last_frame_count)*1000.0/(float)(time_ms - last_frame_print_ms));
+        last_frame_print_ms = time_ms;
+        last_frame_count = frame_counter;
+    }
     return 0;
 }
 
