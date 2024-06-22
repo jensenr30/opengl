@@ -39,6 +39,8 @@ float angle_x = 0;
 float angle_y = 0;
 float angle_z = 0;
 
+float scale = 1.0f;
+
 void gl_clear_errors(void) {
     while(glGetError() != GL_NO_ERROR) {
     }
@@ -298,6 +300,12 @@ void UserInput(void) {
     if (state[SDL_SCANCODE_E]) {
         angle_z -= 2*pi / 100;
     }
+    if (state[SDL_SCANCODE_Z]) {
+        scale *= 0.99f;
+    }
+    if (state[SDL_SCANCODE_C]) {
+        scale *= 1/0.99f;
+    }
 }
 
 void PreDraw(void) {
@@ -317,6 +325,7 @@ void PreDraw(void) {
     transform           = glm::rotate(transform, angle_x, glm::vec3(1.0f, 0.0f, 0.0f));
     transform           = glm::rotate(transform, angle_y, glm::vec3(0.0f, 1.0f, 0.0f));
     transform           = glm::rotate(transform, angle_z, glm::vec3(0.0f, 0.0f, 1.0f));
+    transform           = glm::scale(transform,  glm::vec3(scale,scale,scale));
 
     GLint model_matrix_location
         = glGetUniformLocation(graphics_pipeline_shader_program, "model_matrix");
