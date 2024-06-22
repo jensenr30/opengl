@@ -35,6 +35,10 @@ GLuint graphics_pipeline_shader_program = 0;
 float offset_y = 0.0f;
 float offset_x = 0.0f;
 
+float angle_x = 0;
+float angle_y = 0;
+float angle_z = 0;
+
 void gl_clear_errors(void) {
     while(glGetError() != GL_NO_ERROR) {
     }
@@ -276,6 +280,24 @@ void UserInput(void) {
         offset_x += 0.01;
         // printf("RIGHT\n");
     }
+    if (state[SDL_SCANCODE_W]) {
+        angle_x += 2*pi / 100;
+    }
+    if (state[SDL_SCANCODE_S]) {
+        angle_x -= 2*pi / 100;
+    }
+    if (state[SDL_SCANCODE_A]) {
+        angle_y -= 2*pi / 100;
+    }
+    if (state[SDL_SCANCODE_D]) {
+        angle_y += 2*pi / 100;
+    }
+    if (state[SDL_SCANCODE_Q]) {
+        angle_z += 2*pi / 100;
+    }
+    if (state[SDL_SCANCODE_E]) {
+        angle_z -= 2*pi / 100;
+    }
 }
 
 void PreDraw(void) {
@@ -289,13 +311,17 @@ void PreDraw(void) {
 
     glUseProgram(graphics_pipeline_shader_program);
 
-    glm::mat4 translate = glm::translate(glm::mat4(1.0f), glm::vec3(offset_x, offset_y, 0.0f));
+    glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(offset_x, offset_y, 0.0f));
     // retrieve the location of our model matrix
+
+    transform           = glm::rotate(transform, angle_x, glm::vec3(1.0f, 0.0f, 0.0f));
+    transform           = glm::rotate(transform, angle_y, glm::vec3(0.0f, 1.0f, 0.0f));
+    transform           = glm::rotate(transform, angle_z, glm::vec3(0.0f, 0.0f, 1.0f));
 
     GLint model_matrix_location
         = glGetUniformLocation(graphics_pipeline_shader_program, "model_matrix");
     if (model_matrix_location >= 0) {
-        glUniformMatrix4fv(model_matrix_location, 1, GL_FALSE, &translate[0][0]);
+        glUniformMatrix4fv(model_matrix_location, 1, GL_FALSE, &transform[0][0]);
         // printf("model_matrix_location: %d\n", model_matrix_location);
     } else {
         printf("ERROR getting location of uniform\n");
