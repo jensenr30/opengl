@@ -350,6 +350,7 @@ void PreDraw(void) {
     transform =           glm::rotate(transform, angle_x, glm::vec3(1.0f, 0.0f, 0.0f));
     transform           = glm::rotate(transform, angle_y, glm::vec3(0.0f, 1.0f, 0.0f));
     transform           = glm::rotate(transform, angle_z, glm::vec3(0.0f, 0.0f, 1.0f));
+    transform           = glm::scale(transform, glm::vec3(scale, scale, scale));
     // transform           = glm::scale(transform,  glm::vec3(scale,scale,scale));
 
     GLint model_matrix_location

@@ -8,7 +8,7 @@ layout(location=1) in vec3 vertexColors;
 out vec3 v_vertexColors;
 
 uniform mat4 model_matrix;
-uniform mat4 ortho;
+// uniform mat4 ortho;
 uniform mat4 view_matrix;
 
 void main() {
