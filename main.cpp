@@ -353,14 +353,23 @@ void PreDraw(void) {
         exit(-23);
     }
 
-    glm::mat4 perspective = glm::perspective((float)pi/4, (float)screen.w/(float)screen.h, 0.1f, 10.0f);
-    GLint perspective_location = glGetUniformLocation(graphics_pipeline_shader_program, "perspective");
-    if (perspective_location >= 0) {
-        glUniformMatrix4fv(perspective_location, 1, GL_FALSE, &perspective[0][0]);
+    glm::mat4 ortho = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f);
+    GLint ortho_location = glGetUniformLocation(graphics_pipeline_shader_program, "ortho");
+    if (ortho_location >= 0) {
+        glUniformMatrix4fv(ortho_location, 1, GL_FALSE, &ortho[0][0]);
     } else {
-        printf("PERSPECTIVE LICATION FAIL OPEN GL FAILURE U U U URURURURU /s \n");
+        printf("ORTHO LOCATION FAIL OPEN GL FAILURE U U U URURURURU /s \n");
         exit(-42);
     }
+
+    // glm::mat4 perspective = glm::perspective((float)pi/4, (float)screen.w/(float)screen.h, 0.1f, 10.0f);
+    // GLint perspective_location = glGetUniformLocation(graphics_pipeline_shader_program, "perspective");
+    // if (perspective_location >= 0) {
+    //     glUniformMatrix4fv(perspective_location, 1, GL_FALSE, &perspective[0][0]);
+    // } else {
+    //     printf("PERSPECTIVE LICATION FAIL OPEN GL FAILURE U U U URURURURU /s \n");
+    //     exit(-42);
+    // }
 }
 
 void Draw(void) {

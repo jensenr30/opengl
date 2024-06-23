@@ -8,11 +8,11 @@ layout(location=1) in vec3 vertexColors;
 out vec3 v_vertexColors;
 
 uniform mat4 model_matrix;
-uniform mat4 perspective;
+uniform mat4 ortho;
 
 void main() {
     v_vertexColors = vertexColors;
-    vec4 position_new = perspective * model_matrix * vec4(position, 1.0f);
-    // what the fuck is the .w component???
+    vec4 position_new = ortho * model_matrix * vec4(position, 1.0f);
+    // todo: what purpose does the .w component serve?
     gl_Position = vec4(position_new.x, position_new.y, position_new.z, position_new.w);
 }
