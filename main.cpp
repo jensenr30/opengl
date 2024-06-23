@@ -32,6 +32,11 @@ GLuint vertex_buffer_object = 0; // VBO
 // index buffer object - used to store the list of indicies that we want to draw as verticies
 GLuint gIndexBufferObject = 0;
 
+GLuint vertex_array_object_2 = 0; // VAO
+GLuint vertex_buffer_object_2 = 0; // VBO
+// index buffer object - used to store the list of indicies that we want to draw as verticies
+GLuint gIndexBufferObject_2 = 0;
+
 // program object (for the shaders) - this is the shader program
 GLuint graphics_pipeline_shader_program = 0;
 
@@ -199,6 +204,65 @@ static int InitializeProgram(void) {
     }
 
     printf("InitializeProgram Success!\n");
+    return 0;
+}
+int VertexSpecification2(void) {
+    // lives on the CPU
+    std::vector<GLfloat> vertexPositionAndColor {
+        //  x      y     z
+        0 - 2,0, 0.f,                               // vertex 1
+                                                            1.0f, 0.0f, 0.0f, // color 1
+        1 - 2,0, 0.f,                               // vertex 2
+                                                            0.0f, 1.0f, 0.0f, // color 2
+        equilateral_x - 2, equilateral_y, 0.f,      // vertex 3
+                                                            0.0f, 0.0f, 1.0f, // color 3
+        equilateral_x + 1 - 2, equilateral_y ,0.f,  // vertex 4
+                                                            1.0f, 1.0f, 0.0f, // color 4
+    };
+
+    // scale the verticies so they fit on the screen
+    for (int i = 0; i < vertexPositionAndColor.size(); i++) {
+        int p = i % 6;
+        // if this is vertex data,
+        if (p == 0 || p == 1 || p == 2) {
+            // apply an offset
+            vertexPositionAndColor[i] *= 0.5;
+
+        }
+    }
+
+    // set up stuff on the GPU
+    glGenVertexArrays(1, &vertex_array_object_2);
+    glBindVertexArray(vertex_array_object_2);
+
+    // start generating our VBO
+    glGenBuffers(1, &vertex_buffer_object_2);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object_2);
+    glBufferData(GL_ARRAY_BUFFER, vertexPositionAndColor.size() * sizeof(GLfloat), vertexPositionAndColor.data(), GL_STATIC_DRAW);
+
+    // index definition indexing into the vertex data
+    const std::vector<GLuint> index_buffer_data {0,1,2,  2,1,3};
+
+    // setup the index buffer object
+    glGenBuffers(1, &gIndexBufferObject_2);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gIndexBufferObject_2);
+    // populate our index buffer
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_buffer_data.size()*sizeof(GLuint),
+                 index_buffer_data.data(), GL_STATIC_DRAW);
+
+    // vertex data
+    glEnableVertexAttribArray(0);
+    const int stride = 6 * sizeof(GLfloat);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+
+    // color data
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3*sizeof(GLfloat)));
+
+    // unbind
+    glBindVertexArray(0);
+    glDisableVertexAttribArray(0);
+
     return 0;
 }
 
@@ -398,8 +462,17 @@ void Draw(void) {
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object);
     // old way of drawing vertices
     // glDrawArrays(GL_TRIANGLES,0,6);
-
     glcheck(glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_INT, 0));
+
+    // bind the array (metadata about the buffer?) and enable attributes
+    glBindVertexArray(vertex_array_object_2);
+    // bind the actual data (buffer)
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object_2);
+    // old way of drawing vertices
+    // glDrawArrays(GL_TRIANGLES,0,6);
+    glcheck(glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_INT, 0));
+
+
 
     // stop using the current graphics pipeline - this is probably necessary when using multiple
     // graphics pipelines
@@ -437,6 +510,9 @@ int main(void) {
     // define geometry
     if (VertexSpecification()) {
         return -1;
+    }
+    if (VertexSpecification2()) {
+        return -2;
     }
 
     if (create_graphics_pipeline()) {
