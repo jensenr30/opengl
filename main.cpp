@@ -14,6 +14,9 @@ using std::ifstream;
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "triangle.h"
+#include "camera.hpp"
+
+Camera camera;
 
 struct screen {
     int w;
@@ -275,28 +278,34 @@ void UserInput(void) {
     }
     const Uint8 *state = SDL_GetKeyboardState(NULL);
     if (state[SDL_SCANCODE_UP]) {
-        offset_y += 0.01;
+        camera.MoveUp(0.01);
+        // offset_y += 0.01;
         // printf("UP\n");
     }
     if (state[SDL_SCANCODE_DOWN]) {
-        offset_y -= 0.01;
+        camera.MoveDown(0.01);
+        // offset_y -= 0.01;
         // printf("DOWN\n");
     }
     if (state[SDL_SCANCODE_LEFT]) {
-        offset_x -= 0.01;
+        camera.MoveLeft(0.01);
+        // offset_x -= 0.01;
         // printf("LEFT\n");
     }
     if (state[SDL_SCANCODE_RIGHT]) {
-        offset_x += 0.01;
+        camera.MoveRight(0.01);
+        // offset_x += 0.01;
         // printf("RIGHT\n");
     }
     if (state[SDL_SCANCODE_PAGEDOWN]) {
-        offset_z += 0.01;
-        printf("offset_z: %f\n", offset_z);
+        camera.ZoomOut(0.01);
+        // offset_z += 0.01;
+        // printf("offset_z: %f\n", offset_z);
     }
     if (state[SDL_SCANCODE_PAGEUP]) {
-        offset_z -= 0.01;
-        printf("offset_z: %f\n", offset_z);
+        camera.ZoomIn(0.01);
+        // offset_z -= 0.01;
+        // printf("offset_z: %f\n", offset_z);
     }
     if (state[SDL_SCANCODE_W]) {
         angle_x += 2*pi / 100;
@@ -335,13 +344,13 @@ void PreDraw(void) {
 
     glUseProgram(graphics_pipeline_shader_program);
 
-    glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(offset_x, offset_y, offset_z));
+    glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -0.5));
     // retrieve the location of our model matrix
 
-    transform           = glm::rotate(transform, angle_x, glm::vec3(1.0f, 0.0f, 0.0f));
+    transform =           glm::rotate(transform, angle_x, glm::vec3(1.0f, 0.0f, 0.0f));
     transform           = glm::rotate(transform, angle_y, glm::vec3(0.0f, 1.0f, 0.0f));
     transform           = glm::rotate(transform, angle_z, glm::vec3(0.0f, 0.0f, 1.0f));
-    transform           = glm::scale(transform,  glm::vec3(scale,scale,scale));
+    // transform           = glm::scale(transform,  glm::vec3(scale,scale,scale));
 
     GLint model_matrix_location
         = glGetUniformLocation(graphics_pipeline_shader_program, "model_matrix");
@@ -353,14 +362,23 @@ void PreDraw(void) {
         exit(-23);
     }
 
-    glm::mat4 ortho = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f);
-    GLint ortho_location = glGetUniformLocation(graphics_pipeline_shader_program, "ortho");
-    if (ortho_location >= 0) {
-        glUniformMatrix4fv(ortho_location, 1, GL_FALSE, &ortho[0][0]);
+    glm::mat4 view_matrix = camera.get_view_matrix();
+    GLint view_matrix_location = glGetUniformLocation(graphics_pipeline_shader_program, "view_matrix");
+    if (view_matrix_location >= 0) {
+        glUniformMatrix4fv(view_matrix_location, 1, GL_FALSE, &view_matrix[0][0]);
     } else {
-        printf("ORTHO LOCATION FAIL OPEN GL FAILURE U U U URURURURU /s \n");
+        printf("view_matrix_location LOCATION FAIL OPEN GL FAILURE U U U URURURURU /s \n");
         exit(-42);
     }
+
+    // glm::mat4 ortho = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f);
+    // GLint ortho_location = glGetUniformLocation(graphics_pipeline_shader_program, "ortho");
+    // if (ortho_location >= 0) {
+    //     glUniformMatrix4fv(ortho_location, 1, GL_FALSE, &ortho[0][0]);
+    // } else {
+    //     printf("ORTHO LOCATION FAIL OPEN GL FAILURE U U U URURURURU /s \n");
+    //     exit(-42);
+    // }
 
     // glm::mat4 perspective = glm::perspective((float)pi/4, (float)screen.w/(float)screen.h, 0.1f, 10.0f);
     // GLint perspective_location = glGetUniformLocation(graphics_pipeline_shader_program, "perspective");
